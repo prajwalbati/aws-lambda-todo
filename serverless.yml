@@ -2,7 +2,7 @@ service: aws-lambda-todo
 frameworkVersion: '3'
 
 custom:
-  tableName: 'users-table-${sls:stage}'
+  tableName: 'todo-table-${sls:stage}'
 
 provider:
   name: aws
@@ -21,13 +21,48 @@ provider:
           Resource:
             - Fn::GetAtt: [ UsersTable, Arn ]
   environment:
-    USERS_TABLE: ${self:custom.tableName}
+    TODO_TABLE: ${self:custom.tableName}
 
 functions:
-  api:
-    handler: index.handler
+  create:
+    handler: handler/createTodo.createTodo
     events:
-      - httpApi: '*'
+      - http:
+          path: todos
+          method: post
+          cors: true
+
+  list:
+    handler: handler/listTodos.listTodos
+    events:
+      - http:
+          path: todos/list
+          method: get
+          cors: true
+
+  get:
+    handler: handler/getTodo.getTodo
+    events:
+      - http:
+          path: todos/{id}
+          method: get
+          cors: true
+
+  update:
+    handler: handler/updateTodo.updateTodo
+    events:
+      - http:
+          path: todos/update/{id}
+          method: put
+          cors: true
+
+  delete:
+    handler: handler/deleteTodo.deleteTodo
+    events:
+      - http:
+          path: todos/delete/{id}
+          method: delete
+          cors: true
 
 resources:
   Resources:
